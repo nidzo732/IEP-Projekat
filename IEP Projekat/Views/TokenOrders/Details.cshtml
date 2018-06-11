@@ -1,0 +1,70 @@
+﻿@model IEP_Projekat.Models.TokenOrder
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Token order</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Id)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Id)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+
+        @switch (Model.Status)
+        {
+            case "SUBMITTED":
+                <dd>Submitted</dd>
+                break;
+            case "CANCELED":
+                <dd>Canceled</dd>
+                break;
+            case "COMPLETED":
+                <dd>Completed</dd>
+                break;
+        }
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TokenCount)
+        </dt>
+
+        @if (Model.TokenCount == -1)
+        {
+            <dd>Not known before payment</dd>
+        }
+        else
+        {
+            <dd>
+                @Html.DisplayFor(model => model.TokenCount)
+            </dd>
+        }
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Price)
+        </dt>
+
+        @if (Model.Price == -1)
+        {
+            <dd>Not known before payment</dd>
+        }
+        else
+        {
+            <dd>
+                @Html.DisplayFor(model => model.Price)
+            </dd>
+        }
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Back to List", "Index")
+</p>

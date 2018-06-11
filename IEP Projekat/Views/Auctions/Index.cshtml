@@ -1,0 +1,125 @@
+﻿@model IEnumerable<IEP_Projekat.Models.AuctionViewModel>
+
+@{
+    ViewBag.Title = "Index";
+}
+<script defer>
+    $(document).ready(function ()
+    {
+        setInterval(function ()
+        {
+            $(".auction-list-item-remaining-time").each((idx, element) =>
+            {
+                var sec = parseInt($(element).attr("data-seconds"));
+                if (sec == 0) return;
+                sec -= 1;
+                $(element).attr("data-seconds", sec);
+                if (sec <= 0)
+                {
+                    $(element).text("Completed");
+                    $(element).siblings("button").hide();
+                }
+                else
+                {
+                    var secs = sec % 60;
+                    var mins = Math.floor(sec / 60) % 60;
+                    var hrs = Math.floor(sec / 3600);
+                    secs = "" + secs;
+                    mins = "" + mins;
+                    hrs = "" + hrs;
+                    if (secs.length < 2) secs = "0" + secs;
+                    if (mins.length < 2) mins = "0" + mins;
+                    if (hrs.length < 2) hrs = "0" + hrs;
+                    $(element).text(hrs + ":" + mins + ":" + secs);
+                }
+            });
+        }, 1000);
+    });
+</script>
+<style>
+    .auction-list-item {
+        margin: 20px;
+        width: 200px;
+        height: 310px;
+        display: inline-flex;
+        border: 1px solid lightgray;
+        border-radius: 5px;
+        padding: 5px;
+    }
+
+    .auction-list-item-inner {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    .auction-list-item-name {
+        text-align: center;
+        width: 100%;
+        font-weight: bold;
+        color: #428bca;
+        margin-top: 10px;
+    }
+
+    .auction-list-item-inner-sep {
+        width: 100%;
+        margin-top: 0px;
+    }
+
+    .auction-list-item-picture {
+        width: 160px;
+        max-height: 120px;
+        margin: auto;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .auction-list-item-remaining-time {
+        width: 100%;
+        color: red;
+        text-align: center;
+        font-weight: bold;
+        font-size: x-large;
+    }
+
+    .auction-list-item-current-price {
+        color: green;
+        width: 100%;
+        text-align: center;
+    }
+
+    .bid-now-button {
+        bottom: 10px;
+    }
+</style>
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+@foreach (var item in Model)
+{
+    var timeString = "Not active";
+    var remainingSeconds = (int)((item.EndDate - DateTime.Now).TotalSeconds);
+    if (item.Status == IEP_Projekat.Models.Auction.AuctionStatus.OPENED)
+    {
+        timeString = (item.EndDate - DateTime.Now).ToString(@"hh\:mm\:ss");
+    }
+    else
+    {
+        remainingSeconds = 0;
+    }
+    <div class="auction-list-item">
+        <div class="auction-list-item-inner">
+            <a href="@Url.Action("Details", "Auctions", new { id=item.Id})"><p class="auction-list-item-name">@item.Name</p></a>
+            <hr class="auction-list-item-inner-sep" />
+            <a href="@Url.Action("Details", "Auctions", new { id=item.Id})"><img class="auction-list-item-picture" src="@Url.Action("Picture", "Auctions", new {auctId=item.Id})" /></a>
+            <p data-seconds="@remainingSeconds" class="auction-list-item-remaining-time">@timeString</p>
+            <p class="auction-list-item-current-price">@item.CurrentAmmount</p>
+            @if (User.Identity.IsAuthenticated && item.Status == IEP_Projekat.Models.Auction.AuctionStatus.OPENED)
+            {
+                <button class="form-control bid-now-button">Bid now</button>
+            }
+        </div>
+    </div>
+}

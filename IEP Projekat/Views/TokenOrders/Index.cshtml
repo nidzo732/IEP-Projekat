@@ -1,0 +1,72 @@
+﻿@model IEnumerable<IEP_Projekat.Models.TokenOrder>
+
+@{
+    ViewBag.Title = "Token orders";
+}
+
+<h2>Token orders</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Id)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Status)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.TokenCount)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Price)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>...@item.Id.Substring(item.Id.Length-10,10)</td>
+            @switch (item.Status)
+            {
+                case "SUBMITTED":
+                    <td>Submitted</td>
+                    break;
+                case "CANCELED":
+                    <td>Canceled</td>
+                    break;
+                case "COMPLETED":
+                    <td>Completed</td>
+                    break;
+            }
+
+            @if (item.TokenCount == -1)
+            {
+                <td>Not known before payment</td>
+            }
+            else
+            {
+                <td>
+                    @Html.DisplayFor(modelItem => item.TokenCount)
+                </td>
+            }
+            @if(item.Price==-1)
+            {
+                <td>Not known before payment</td>
+            }
+            else
+            {
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+            }
+            <td>
+                @Html.ActionLink("Details", "Details", new { id = item.Id })
+            </td>
+        </tr>
+    }
+
+</table>
