@@ -67,11 +67,17 @@ namespace IEP_Projekat.Controllers
             if (model.MyPurchases != null && (bool)(model.MyPurchases)) auctions = auctions.Where(x => x.LastBidder!=null && x.LastBidder.Id==myId && x.EndDate<now);
             if (model.Status != null) auctions = auctions.Where(x => x.Status == model.Status);
             auctions = auctions.OrderByDescending(x => x.StartDate);
-            if(model.Page!=null)
+            if(model.Page!=null && model.Page>0)
             {
-                auctions.Skip((int)model.Page * 10);
+                auctions = auctions.Skip((int)(model.Page-1)* 10);
             }
-            return View(auctions.Take(10).ToList());
+            else
+            {
+                model.Page = 1;
+            }
+            var result = await auctions.Take(10).ToListAsync();
+            ViewBag.Query = model;
+            return View(result.Select(x=>new AuctionViewModel(x)).ToList());
         }
 
         // GET: Auctions/Details/5

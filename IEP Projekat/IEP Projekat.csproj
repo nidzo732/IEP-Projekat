@@ -247,6 +247,14 @@
     <Compile Include="Migrations\201806112238330_dodat lastbidder.Designer.cs">
       <DependentUpon>201806112238330_dodat lastbidder.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201806112333139_dodat currentammount.cs" />
+    <Compile Include="Migrations\201806112333139_dodat currentammount.Designer.cs">
+      <DependentUpon>201806112333139_dodat currentammount.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201806112346300_ne znam sta hoce.cs" />
+    <Compile Include="Migrations\201806112346300_ne znam sta hoce.Designer.cs">
+      <DependentUpon>201806112346300_ne znam sta hoce.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Auction.cs" />
@@ -309,6 +317,7 @@
     <Content Include="Views\Auctions\Details.cshtml" />
     <Content Include="Views\Auctions\Edit.cshtml" />
     <Content Include="Views\Auctions\Index.cshtml" />
+    <Content Include="Views\Auctions\SearchQueryForm.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -356,6 +365,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201806112238330_dodat lastbidder.resx">
       <DependentUpon>201806112238330_dodat lastbidder.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201806112333139_dodat currentammount.resx">
+      <DependentUpon>201806112333139_dodat currentammount.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201806112346300_ne znam sta hoce.resx">
+      <DependentUpon>201806112346300_ne znam sta hoce.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

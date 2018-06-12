@@ -15,11 +15,11 @@
             @Html.ActionLink("Change your password", "ChangePassword")
         </dd>
     </dl>
+    <hr />
     @using (Html.BeginForm("UpdateData", "Manage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
     {
         @Html.AntiForgeryToken()
         <h4>Edit account data</h4>
-        <hr />
         @Html.ValidationSummary("", new { @class = "text-danger" })
         <div class="form-group">
             @Html.LabelFor(m => m.Email, new { @class = "col-md-2 control-label" })

@@ -52,5 +52,7 @@ namespace IEP_Projekat.Models
 
         public DbSet<TokenOrder> TokenOrders { get; set; }
         public DbSet<Auction> Auctions { get; set; }
+
+        public System.Data.Entity.DbSet<IEP_Projekat.Models.SearchViewModel> SearchViewModels { get; set; }
     }
 }

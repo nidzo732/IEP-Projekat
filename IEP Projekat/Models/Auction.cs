@@ -122,6 +122,7 @@ namespace IEP_Projekat.Models
 
         [Required]
         [Display(Name = "Name")]
+        [MaxLength(50)]
         public string Name { get; set; }
 
         [Required]

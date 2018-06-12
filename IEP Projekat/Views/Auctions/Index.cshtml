@@ -1,7 +1,8 @@
 ﻿@model IEnumerable<IEP_Projekat.Models.AuctionViewModel>
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Auctions";
+    IEP_Projekat.Models.SearchViewModel query = ViewBag.Query;
 }
 <script defer>
     $(document).ready(function ()
@@ -35,6 +36,13 @@
             });
         }, 1000);
     });
+    function pageChange(diff)
+    {
+        var currVal = parseInt($("#Page").val());
+        currVal += diff;
+        $("#Page").val(currVal);
+        $("#filter-form").submit();
+    }
 </script>
 <style>
     .auction-list-item {
@@ -92,11 +100,33 @@
         bottom: 10px;
     }
 </style>
-<h2>Index</h2>
+<h2>Auctions</h2>
 
 <p>
     @Html.ActionLink("Create New", "Create")
 </p>
+
+<div class="collapse" id="detailed-search">
+    @Html.Partial("SearchQueryForm", query)
+</div>
+<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#detailed-search" aria-expanded="false" aria-controls="detailed-search">
+    Filter
+</button><br /><br />
+@if (query.Page > 1)
+{
+    <a href="#" onclick="pageChange(-1)"><span class="glyphicon glyphicon-arrow-left"></span></a>
+}
+@if (query.Page > 1 || Model.Count() == 10)
+{
+    <span>@query.Page</span>
+}
+@if (Model.Count() == 10)
+{
+    <a href="#" onclick="pageChange(1)"><span class="glyphicon glyphicon-arrow-right"></span></a>
+}
+<br />
+
+
 @foreach (var item in Model)
 {
     var timeString = "Not active";
