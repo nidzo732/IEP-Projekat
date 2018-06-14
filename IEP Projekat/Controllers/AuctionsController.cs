@@ -54,7 +54,7 @@ namespace IEP_Projekat.Controllers
             var auctions = Db.Auctions.Include(x => x.User).Include(x=>x.LastBidder);
             if(!imAdmin)
             {
-                auctions = auctions.Where(x => x.Status == Auction.AuctionStatus.OPENED || x.User.Id == myId);
+                auctions = auctions.Where(x => (x.Status == Auction.AuctionStatus.OPENED && x.EndDate>now) || x.User.Id == myId || (x.LastBidder!=null && x.LastBidder.Id==myId));
             }
             if(!string.IsNullOrEmpty(model.SearchQuery))
             {
@@ -65,18 +65,20 @@ namespace IEP_Projekat.Controllers
             if (model.MinPrice != null) auctions = auctions.Where(x => x.CurrentAmmount >= model.MinPrice);
             if (model.My != null && (bool)(model.My)) auctions = auctions.Where(x => x.User.Id == myId);
             if (model.MyPurchases != null && (bool)(model.MyPurchases)) auctions = auctions.Where(x => x.LastBidder!=null && x.LastBidder.Id==myId && x.EndDate<now);
-            if (model.Status != null) auctions = auctions.Where(x => x.Status == model.Status);
             auctions = auctions.OrderByDescending(x => x.StartDate);
+            int pageSize = int.Parse(Db.Params.Find("N").Value);
             if(model.Page!=null && model.Page>0)
             {
-                auctions = auctions.Skip((int)(model.Page-1)* 10);
+                auctions = auctions.Skip((int)(model.Page-1)* pageSize);
             }
             else
             {
                 model.Page = 1;
             }
-            var result = await auctions.Take(10).ToListAsync();
+            var result = await auctions.Take(pageSize).ToListAsync();
+            ViewBag.PageSize = pageSize;
             ViewBag.Query = model;
+            if (model.Status != null) result = result.Where(x => x.RealStatus == model.Status).ToList();
             return View(result.Select(x=>new AuctionViewModel(x)).ToList());
         }
 
@@ -88,11 +90,22 @@ namespace IEP_Projekat.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            AuctionViewModel auction = new AuctionViewModel(await Db.Auctions.FindAsync(id));
+            AuctionViewModel auction = new AuctionViewModel(await Db.Auctions.Include(x=>x.User).Include(x=>x.LastBidder).FirstOrDefaultAsync(x=>x.Id==id));
             if (auction == null)
             {
                 return HttpNotFound();
             }
+            var bids = Db.Bids.Where(x => x.AuctionId == id).OrderByDescending(x=>x.TimeStamp).ToList();
+            var users = bids.Select(x => Db.Users.Find(x.UserId)).ToList();
+            decimal q = auction.CurrentAmmount;
+            foreach(var bid in bids)
+            {
+                decimal g = bid.Increment;
+                bid.Increment = q;
+                q -= g;
+            }
+            ViewBag.Bids = bids;
+            ViewBag.Users = users;
             return View(auction);
         }
 
@@ -110,7 +123,7 @@ namespace IEP_Projekat.Controllers
         {
             return View(new AuctionViewModel
             {
-                Duration=86400,
+                Duration=long.Parse(Db.Params.Find("D").Value),
                 StartAmmount=10,                
             });
         }
@@ -136,6 +149,8 @@ namespace IEP_Projekat.Controllers
                     PictureContent = ImageManipulation.StoreImage(ImageManipulation.ResizeImage(ImageManipulation.LoadImage(auction.Picture.InputStream), 600, 600)),
                     Status = Auction.AuctionStatus.READY,
                     User = await UserManager.FindByIdAsync(User.Identity.GetUserId()),
+                    Currency=Db.Params.Find("C").Value,
+                    CurrencyPrice=decimal.Parse(Db.Params.Find("T").Value)
                 });
                 await Db.SaveChangesAsync();
                 return RedirectToAction("Index");
@@ -147,12 +162,106 @@ namespace IEP_Projekat.Controllers
         public ActionResult Start(string id)
         {
             var auction = Db.Auctions.Include(x=>x.User).FirstOrDefault(x => x.Id == id);
-            if (auction == null || auction.Status != Auction.AuctionStatus.READY) return HttpNotFound();
+            if (auction == null || auction.RealStatus != Auction.AuctionStatus.READY) return HttpNotFound();
             auction.Status = Auction.AuctionStatus.OPENED;
             auction.StartDate = DateTime.Now;
             auction.EndDate = DateTime.Now.AddSeconds(auction.Duration);
             Db.SaveChanges();
             return RedirectToAction("Details", new { id = id });
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<ActionResult> Bid(string id, decimal increment, decimal expVal)
+        {
+            if (increment <= 0 || expVal <= 0) return HttpNotFound();
+            var status = "OK";
+            using (var trans = Db.Database.BeginTransaction())
+            {
+                try
+                {
+                    var auction = await Db.Auctions.Include(x=>x.LastBidder).Include(x=>x.User).FirstOrDefaultAsync(x=>x.Id==id);
+                    var currencyPrice = auction.CurrencyPrice;
+                    var user =await  UserManager.FindByIdAsync(User.Identity.GetUserId());
+                    if (auction==null || auction.RealStatus==Auction.AuctionStatus.READY || user.Id == auction.User.Id)
+                    {
+                        trans.Rollback();
+                        return HttpNotFound();
+                    }
+                    var avlMoney = user.Tokens * auction.CurrencyPrice;
+                    if(auction.RealStatus==Auction.AuctionStatus.COMPLETED)
+                    {
+                        status = "ERR:Auction has ended";
+                    }
+                    else if(auction.CurrentAmmount!=expVal)
+                    {
+                        status = "ERR:Somebody overtook you to this bid";
+                    }
+                    else if(auction.CurrentAmmount+increment>avlMoney && (auction.LastBidder == null || auction.LastBidder.Id != user.Id))
+                    {
+                        status = "ERR:Not enough tokens";
+                    }
+                    else if(auction.LastBidder!=null && auction.LastBidder.Id==user.Id && avlMoney<increment)
+                    {
+                        status = "ERR:Not enough tokens";
+                    }
+                    else
+                    {
+                        var newId = Guid.NewGuid().ToString();
+                        Db.Bids.Add(new Models.Bid
+                        {
+                            Id = newId,
+                            AuctionId = auction.Id,
+                            Increment = increment,
+                            TimeStamp = DateTime.Now,
+                            UserId = user.Id
+                        });
+                        if (auction.LastBidder != null)
+                        {
+                            auction.LastBidder.Tokens += auction.CurrentAmmount/currencyPrice;
+                            auction.User.Tokens-= auction.CurrentAmmount / currencyPrice;
+                        }
+                        auction.CurrentAmmount += increment;
+                        var prevBidder = auction.LastBidder!=null?auction.LastBidder.Id:"";
+                        auction.LastBidder = user;
+                        auction.LastBidder.Tokens -= auction.CurrentAmmount/currencyPrice;
+                        auction.User.Tokens+= auction.CurrentAmmount / currencyPrice;
+                        AuctionHub.PriceUpdate(id, auction.CurrentAmmount, auction.LastBidder != null ? auction.LastBidder.FirstName + " " + auction.LastBidder.LastName : auction.User.FirstName + " " + auction.User.LastName, prevBidder, auction.CurrentAmmount/currencyPrice);
+                    }
+                    await Db.SaveChangesAsync();
+                    trans.Commit();
+                    var response = new {
+                        status=status,
+                        ammount=auction.CurrentAmmount,
+                        lastBidder= auction.LastBidder != null ? auction.LastBidder.FirstName + " " + auction.LastBidder.LastName : auction.User.FirstName + " " + auction.User.LastName,
+                        tokens =user.Tokens
+                    };
+                    return Json(response);
+                }
+                catch(Exception ex)
+                {
+                    trans.Rollback();
+                    return HttpNotFound();
+                }
+            }
+        }
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<ActionResult> BidsList(string id)
+        {
+            var auction = await Db.Auctions.FindAsync(id);
+            if (auction == null) return HttpNotFound();
+            var bids = await Db.Bids.Where(x => x.AuctionId == id).OrderByDescending(x => x.TimeStamp).ToListAsync();
+            var users = bids.Select(x => Db.Users.Find(x.UserId)).ToList();
+            decimal q = auction.CurrentAmmount;
+            foreach (var bid in bids)
+            {
+                decimal g = bid.Increment;
+                bid.Increment = q;
+                q -= g;
+            }
+            ViewBag.Users = users;
+            return PartialView(bids);
         }
         // GET: Auctions/Edit/5
         /*public async Task<ActionResult> Edit(string id)

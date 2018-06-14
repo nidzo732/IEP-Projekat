@@ -9,6 +9,7 @@ namespace IEP_Projekat
         public void Configuration(IAppBuilder app)
         {
             ConfigureAuth(app);
+            app.MapSignalR();
         }
     }
 }

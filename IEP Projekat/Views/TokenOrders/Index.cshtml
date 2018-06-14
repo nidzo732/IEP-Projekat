@@ -2,13 +2,29 @@
 
 @{
     ViewBag.Title = "Token orders";
+    int page = ViewBag.page;
+    int pageSize = ViewBag.pageSize;
 }
 
 <h2>Token orders</h2>
 
 <p>
-    @Html.ActionLink("Create New", "Create")
+    <button style="width:15%;display:inline;" class="form-control">@Html.ActionLink("Buy silver", "Create", new { type = 0 })</button>
+    <button style="width:15%;display:inline;" class="form-control">@Html.ActionLink("Buy gold", "Create", new { type = 1 })</button>
+    <button style="width:15%;display:inline;" class="form-control">@Html.ActionLink("Buy platinum", "Create", new { type = 2 })</button>
 </p>
+@if (page > 1)
+{
+    <a href="@Url.Action("Index", "TokenOrders", new {page=page-1})"><span class="glyphicon glyphicon-arrow-left"></span></a>
+}
+    @if (page > 1 || Model.Count() == pageSize)
+{
+    <span>@page</span>
+}
+@if (Model.Count() == pageSize)
+{
+    <a href="@Url.Action("Index", "TokenOrders", new {page=page+1})"><span class="glyphicon glyphicon-arrow-right"></span></a>
+}
 <table class="table">
     <tr>
         <th>
@@ -23,13 +39,16 @@
         <th>
             @Html.DisplayNameFor(model => model.Price)
         </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Timestamp)
+        </th>
         <th></th>
     </tr>
 
     @foreach (var item in Model)
     {
         <tr>
-            <td>...@item.Id.Substring(item.Id.Length-10,10)</td>
+            <td>...@item.Id.Substring(item.Id.Length - 10, 10)</td>
             @switch (item.Status)
             {
                 case "SUBMITTED":
@@ -53,7 +72,7 @@
                     @Html.DisplayFor(modelItem => item.TokenCount)
                 </td>
             }
-            @if(item.Price==-1)
+            @if (item.Price == -1)
             {
                 <td>Not known before payment</td>
             }
@@ -63,6 +82,9 @@
                     @Html.DisplayFor(modelItem => item.Price)
                 </td>
             }
+            <td>
+                    @Html.DisplayFor(modelItem => item.Timestamp)
+                </td>
             <td>
                 @Html.ActionLink("Details", "Details", new { id = item.Id })
             </td>

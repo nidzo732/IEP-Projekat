@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -27,6 +28,8 @@ namespace IEP_Projekat.Models
             Status=model.Status;
             User = model.User;
             CurrentAmmount = model.CurrentAmmount;
+            Currency = model.Currency;
+            CurrencyPrice = model.CurrencyPrice;
             
             if(model.Picture!=null)
             {
@@ -57,6 +60,12 @@ namespace IEP_Projekat.Models
         [Display(Name = "Current ammount")]
         public decimal CurrentAmmount { get; set; }
 
+        [Required]
+        public string Currency { get; set; }
+
+        [Required]
+        public decimal CurrencyPrice { get; set; }
+
         public enum AuctionStatus { READY, OPENED, COMPLETED};
 
         [Required]
@@ -79,6 +88,18 @@ namespace IEP_Projekat.Models
         public ApplicationUser User { get; set; }
 
         public ApplicationUser LastBidder { get; set; }
+
+        [NotMapped]
+        public AuctionStatus RealStatus
+        {
+            get
+            {
+                if (Status == AuctionStatus.READY) return AuctionStatus.READY;
+                if (Status == AuctionStatus.COMPLETED) return AuctionStatus.COMPLETED;
+                if (EndDate <= DateTime.Now) return AuctionStatus.COMPLETED;
+                return AuctionStatus.OPENED;
+            }
+        }
 
 
 
@@ -116,6 +137,8 @@ namespace IEP_Projekat.Models
             this.LastBidder = au.LastBidder;
             this.User = au.User;
             this.CurrentAmmount = au.CurrentAmmount;
+            this.Currency = au.Currency;
+            this.CurrencyPrice = au.CurrencyPrice;
         }
         
         public string Id { get; set; }
@@ -127,12 +150,12 @@ namespace IEP_Projekat.Models
 
         [Required]
         [Display(Name = "Duration")]
-        [Range(1, int.MaxValue, ErrorMessage = "Duration must be a positive non zero number")]
+        [Range(0.01, int.MaxValue, ErrorMessage = "Duration must be a positive non zero number")]
         public long Duration { get; set; }
 
         [Required]
         [Display(Name = "Start ammount")]
-        [Range(1, int.MaxValue, ErrorMessage = "Start ammount must be a positive non zero number")]
+        [Range(0.01, int.MaxValue, ErrorMessage = "Start ammount must be a positive non zero number")]
         public decimal StartAmmount { get; set; }
 
         [Display(Name = "Current ammount")]
@@ -147,13 +170,36 @@ namespace IEP_Projekat.Models
         [Display(Name = "End date")]
         public DateTime EndDate { get; set; }
 
+        public string Currency { get; set; }
+
+        public decimal CurrencyPrice { get; set; }
+
         public ApplicationUser User { get; set; }
 
+        public Auction.AuctionStatus RealStatus
+        {
+            get
+            {
+                if (Status == Auction.AuctionStatus.READY) return Auction.AuctionStatus.READY;
+                if (Status == Auction.AuctionStatus.COMPLETED) return Auction.AuctionStatus.COMPLETED;
+                if (EndDate <= DateTime.Now) return Auction.AuctionStatus.COMPLETED;
+                return Auction.AuctionStatus.OPENED;
+            }
+        }
+
         [Required]
-        [Display(Name = "Picture")]
+        [Display(Name = "Picture (3.5MB max)")]
         public HttpPostedFileBase Picture { get; set; }
 
         public ApplicationUser LastBidder { get; set; }
+
+        public string CurrencyDescription
+        {
+            get
+            {
+                return Currency + " (" + CurrencyPrice.ToString() + " per token)";
+            }
+        }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

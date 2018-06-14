@@ -46,6 +46,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.Core, Version=2.1.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.SignalR.Core.2.1.2\lib\net45\Microsoft.AspNet.SignalR.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.SystemWeb, Version=2.1.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.SignalR.SystemWeb.2.1.2\lib\net45\Microsoft.AspNet.SignalR.SystemWeb.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.8.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
@@ -53,12 +62,21 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.6.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.6\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Web.Http, Version=5.2.6.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.6\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.Owin, Version=5.2.6.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Owin.5.2.6\lib\net45\System.Web.Http.Owin.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
@@ -115,12 +133,6 @@
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Net.Http.Formatting">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Http">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Http.WebHost">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.3\lib\net45\System.Web.Http.WebHost.dll</HintPath>
@@ -199,8 +211,11 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="AuctionHub.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Controllers\AuctionsController.cs" />
+    <Compile Include="Controllers\CentiliController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\TokenOrdersController.cs" />
     <Compile Include="Global.asax.cs">
@@ -255,11 +270,37 @@
     <Compile Include="Migrations\201806112346300_ne znam sta hoce.Designer.cs">
       <DependentUpon>201806112346300_ne znam sta hoce.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201806121431062_uklonjen view model dodat bid.cs" />
+    <Compile Include="Migrations\201806121431062_uklonjen view model dodat bid.Designer.cs">
+      <DependentUpon>201806121431062_uklonjen view model dodat bid.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201806121506261_bid uklonjen required.cs" />
+    <Compile Include="Migrations\201806121506261_bid uklonjen required.Designer.cs">
+      <DependentUpon>201806121506261_bid uklonjen required.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201806121511138_promenjen FK u Bid.cs" />
+    <Compile Include="Migrations\201806121511138_promenjen FK u Bid.Designer.cs">
+      <DependentUpon>201806121511138_promenjen FK u Bid.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201806121949261_dodati parametri.cs" />
+    <Compile Include="Migrations\201806121949261_dodati parametri.Designer.cs">
+      <DependentUpon>201806121949261_dodati parametri.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201806121956393_dodat opis u Param.cs" />
+    <Compile Include="Migrations\201806121956393_dodat opis u Param.Designer.cs">
+      <DependentUpon>201806121956393_dodat opis u Param.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201806122034048_dodate valute.cs" />
+    <Compile Include="Migrations\201806122034048_dodate valute.Designer.cs">
+      <DependentUpon>201806122034048_dodate valute.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Auction.cs" />
+    <Compile Include="Models\Bid.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
+    <Compile Include="Models\Param.cs" />
     <Compile Include="Models\SearchViewModel.cs" />
     <Compile Include="Models\TokenOrder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -277,10 +318,17 @@
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="log4net.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="Properties\PublishProfiles\iep-aukcija - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
+    <Content Include="Scripts\global.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
+    <Content Include="Scripts\jquery.signalR-2.1.2.js" />
+    <Content Include="Scripts\jquery.signalR-2.1.2.min.js" />
     <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
@@ -315,9 +363,12 @@
     <Content Include="Views\Auctions\Create.cshtml" />
     <Content Include="Views\Auctions\Delete.cshtml" />
     <Content Include="Views\Auctions\Details.cshtml" />
-    <Content Include="Views\Auctions\Edit.cshtml" />
     <Content Include="Views\Auctions\Index.cshtml" />
     <Content Include="Views\Auctions\SearchQueryForm.cshtml" />
+    <Content Include="Views\Admin\Details.cshtml" />
+    <Content Include="Views\Admin\Edit.cshtml" />
+    <Content Include="Views\Admin\Index.cshtml" />
+    <Content Include="Views\Auctions\BidsList.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -371,6 +422,24 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201806112346300_ne znam sta hoce.resx">
       <DependentUpon>201806112346300_ne znam sta hoce.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201806121431062_uklonjen view model dodat bid.resx">
+      <DependentUpon>201806121431062_uklonjen view model dodat bid.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201806121506261_bid uklonjen required.resx">
+      <DependentUpon>201806121506261_bid uklonjen required.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201806121511138_promenjen FK u Bid.resx">
+      <DependentUpon>201806121511138_promenjen FK u Bid.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201806121949261_dodati parametri.resx">
+      <DependentUpon>201806121949261_dodati parametri.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201806121956393_dodat opis u Param.resx">
+      <DependentUpon>201806121956393_dodat opis u Param.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201806122034048_dodate valute.resx">
+      <DependentUpon>201806122034048_dodate valute.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

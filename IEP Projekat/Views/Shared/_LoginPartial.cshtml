@@ -9,13 +9,24 @@
     var firstName = user.FirstName;
     var lastName = user.LastName;
     var tokens = user.Tokens;
+    <script>
+        window.myId = '@User.Identity.GetUserId()';
+        window.myName = '@firstName @lastName';
+    </script>
     using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
     {
         @Html.AntiForgeryToken()
 
         <ul class="nav navbar-nav navbar-right">
+
+            @if (User.IsInRole("admin"))
+            {
+                <li>
+                    <a href="@Url.Action("Index", "Admin")" title="Manage your tokens">Admin</a>
+                </li>
+            }
             <li>
-                @Html.ActionLink("Tokens: " + tokens, "Index", "TokenOrders", routeValues: null, htmlAttributes: new { title = "Manage" })
+                <a href="@Url.Action("Index", "TokenOrders")" title="Manage your tokens">Tokens: <span id="my-tokens">@tokens</span></a>
             </li>
             <li>
                 @Html.ActionLink("Hello " + firstName + " " + lastName + "!", "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })

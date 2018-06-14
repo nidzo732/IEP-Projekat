@@ -55,10 +55,14 @@ namespace IEP_Projekat.Controllers
 
 
         // GET: TokenOrders
-        public ActionResult Index()
+        public async Task<ActionResult> Index(int? page)
         {
+            if (page == null) page = 1;
+            int pageSize = int.Parse((await Db.Params.FindAsync("N")).Value);
             var id = User.Identity.GetUserId();
-            return View(Db.TokenOrders.Where(x=>x.User.Id==id).ToList());
+            ViewBag.page = page;
+            ViewBag.pageSize = pageSize;
+            return View(await Db.TokenOrders.Where(x=>x.User.Id==id).OrderByDescending(x=>x.Timestamp).Skip(((int)page-1)*pageSize).Take(pageSize).ToListAsync());
         }
 
         // GET: TokenOrders/Details/5
@@ -77,19 +81,35 @@ namespace IEP_Projekat.Controllers
         }
 
         // GET: TokenOrders/Create
-        public async Task<ActionResult> Create()
+        public async Task<ActionResult> Create(int type)
         {
+            if (type < 0 || type > 2) return HttpNotFound();
+            decimal amount = 0;
+            switch(type)
+            {
+                case 0:
+                    amount = int.Parse(Db.Params.Find("S").Value);
+                    break;
+                case 1:
+                    amount = int.Parse(Db.Params.Find("G").Value);
+                    break;
+                case 2:
+                    amount = int.Parse(Db.Params.Find("P").Value);
+                    break;
+            }
+            var orderId = Guid.NewGuid().ToString();
             Db.TokenOrders.Add(new TokenOrder
             {
-                Id = Guid.NewGuid().ToString(),
-                Price = -1,
-                TokenCount = -1,
+                Id = orderId,
+                Price = amount*decimal.Parse(Db.Params.Find("T").Value),
+                TokenCount = amount,
                 Status = "SUBMITTED",
                 User=await UserManager.FindByIdAsync(User.Identity.GetUserId()),
                 Timestamp=DateTime.Now
             });
             await Db.SaveChangesAsync();
-            return Redirect("https://stage.centili.com/widget/WidgetModule?api=ae813e143aba790ae6729f2897849af4");
+            return Redirect("https://stage.centili.com/widget/WidgetModule?api=ae813e143aba790ae6729f2897849af4&clientId="+orderId+"&package="+type.ToString());
+            //reference
         }
 
         [AllowAnonymous]

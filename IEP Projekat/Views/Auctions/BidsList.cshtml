@@ -1,0 +1,37 @@
+﻿@using IEP_Projekat.Models
+@model IEnumerable<IEP_Projekat.Models.Bid>
+@{ 
+    List<ApplicationUser> users = ViewBag.Users;
+}
+<h3>Bids</h3>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Increment)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.TimeStamp)
+        </th>
+        <th>
+            User
+        </th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Increment)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.TimeStamp)
+        </td>
+        <td>
+            @{ 
+                var user = users.First(x => x.Id == item.UserId);
+            }
+            @user.FirstName @user.LastName
+        </td>
+    </tr>
+}
+
+</table>

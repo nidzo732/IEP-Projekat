@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Data.Entity;
+using System.Data.Entity.ModelConfiguration.Conventions;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
@@ -52,7 +53,7 @@ namespace IEP_Projekat.Models
 
         public DbSet<TokenOrder> TokenOrders { get; set; }
         public DbSet<Auction> Auctions { get; set; }
-
-        public System.Data.Entity.DbSet<IEP_Projekat.Models.SearchViewModel> SearchViewModels { get; set; }
+        public DbSet<Bid> Bids { get; set; }
+        public DbSet<Param> Params { get; set; }
     }
 }

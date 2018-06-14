@@ -1,17 +1,27 @@
-﻿@model IEP_Projekat.Models.AuctionViewModel
+﻿@using Microsoft.AspNet.Identity
+@using IEP_Projekat.Models;
+@model IEP_Projekat.Models.AuctionViewModel
 
 @{
     ViewBag.Title = Model.Name;
     var remainingSeconds = (int)((Model.EndDate - DateTime.Now).TotalSeconds);
-    var timeString = "Not active";
-    if (Model.Status == IEP_Projekat.Models.Auction.AuctionStatus.OPENED)
+    var timeString = "";
+    if (Model.RealStatus == IEP_Projekat.Models.Auction.AuctionStatus.OPENED)
     {
         timeString = (Model.EndDate - DateTime.Now).ToString(@"hh\:mm\:ss");
     }
-    else
+    else if (Model.RealStatus == IEP_Projekat.Models.Auction.AuctionStatus.READY)
     {
+        timeString = "Not yet active";
         remainingSeconds = 0;
     }
+    else
+    {
+        timeString = "Complete";
+        remainingSeconds = 0;
+    }
+    List<Bid> bids = ViewBag.Bids;
+    List<ApplicationUser> users = ViewBag.Users;
 }
 <script>
     $(document).ready(function ()
@@ -26,7 +36,7 @@
                 $(element).attr("data-seconds", sec);
                 if (sec <= 0)
                 {
-                    $(element).text("Completed");
+                    $(element).text("Complete");
                     $(element).siblings("button").hide();
                 }
                 else
@@ -95,18 +105,26 @@
     .bid-now-button {
         bottom: 10px;
     }
+
+    #increment {
+        margin-bottom: 5px
+    }
 </style>
 <h2>@Model.Name</h2>
-<div class="auction-list-item">
+<h4>By: @Model.User.FirstName @Model.User.LastName</h4>
+<div class="auction-list-item" id="auction-item-@Model.Id">
     <div class="auction-list-item-inner">
         <img class="auction-list-item-picture" src="@Url.Action("Picture", "Auctions", new {auctId=Model.Id})" />
         <p data-seconds="@remainingSeconds" class="auction-list-item-remaining-time">@timeString</p>
-        <p class="auction-list-item-current-price">@Model.StartAmmount</p>
-        @if (User.Identity.IsAuthenticated && Model.Status == IEP_Projekat.Models.Auction.AuctionStatus.OPENED)
+        <p class="auction-list-item-current-price">@Model.CurrentAmmount</p>
+        <p style="width:100%;text-align:center">@Model.CurrencyDescription</p>
+        <p class="auction-list-item-last-bidder">@(Model.LastBidder != null ? Model.LastBidder.FirstName + " " + Model.LastBidder.LastName : "No bids yet")</p>
+        @if (User.Identity.IsAuthenticated && User.Identity.GetUserId() != Model.User.Id && Model.RealStatus == IEP_Projekat.Models.Auction.AuctionStatus.OPENED)
         {
-            <button class="form-control bid-now-button">Bid now</button>
+            <input class="form-control text-box single-line valid" data-val="true" data-val-number="The field Increment must be a number." data-val-range="Increment must be a positive non zero number" data-val-range-max="2147483647" data-val-range-min="1" data-val-required="The Increment field is required." id="increment" type="number" value="1.00" placeholder="Bid increment">
+            <button class="form-control bid-now-button" onclick="postBid('@Model.Id', $('#increment').val(), this)">Bid now</button>
         }
-        else if (Model.Status == IEP_Projekat.Models.Auction.AuctionStatus.READY && User.IsInRole("admin"))
+        else if (Model.RealStatus == IEP_Projekat.Models.Auction.AuctionStatus.READY && User.IsInRole("admin"))
         {
 
             using (Html.BeginForm("Start", "Auctions", FormMethod.Post))
@@ -121,3 +139,6 @@
 <p>
     @Html.ActionLink("Back to List", "Index")
 </p>
+<div id="bidlist">
+    @Html.Partial("BidsList", bids)
+</div>
