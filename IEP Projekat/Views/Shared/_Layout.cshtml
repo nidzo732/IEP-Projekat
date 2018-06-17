@@ -23,9 +23,7 @@
                 @Html.ActionLink("Auctions", "Index", "Auctions", new { area = "" }, new { @class = "navbar-brand" })
             </div>
             <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    
-                </ul>
+                <ul class="nav navbar-nav"></ul>
                 @Html.Partial("_LoginPartial")
             </div>
         </div>
@@ -39,5 +37,18 @@
     </div>
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
+    <div id="aftoken">
+        @Html.AntiForgeryToken()
+    </div>
+    <script defer>
+        var rfTokenValue;
+        var rfTokenName;
+        $(document).ready(() =>
+        {
+            var token = $($("#aftoken").find("input")[0])
+            rfTokenValue = token.val();
+            rfTokenName = token[0].name;
+        });
+    </script>
 </body>
 </html>

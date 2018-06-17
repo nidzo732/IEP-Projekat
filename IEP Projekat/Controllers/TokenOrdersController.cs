@@ -112,29 +112,6 @@ namespace IEP_Projekat.Controllers
             //reference
         }
 
-        [AllowAnonymous]
-        public async Task<ActionResult> CentiliHook(string id, decimal price, decimal count, string status)
-        {
-            try
-            {
-                if (status != "CANCELED" && status != "COMPLETED") return Content("OK");
-                if (price <= 0 || count <= 0) return Content("OK");
-                var order = Db.TokenOrders.Include(x=>x.User).FirstOrDefault(x=>x.Id==id);
-                if (order == null) return Content("OK");
-                if (order.Status != "SUBMITTED") return Content("OK");
-                order.Status = status;
-                order.Price = price;
-                order.TokenCount = count;
-                order.User.Tokens += count;
-                await Db.SaveChangesAsync();
-                return Content("OK");
-            }
-            catch(Exception ex)
-            {
-                return Content("OK");
-            }
-        }
-
         protected override void Dispose(bool disposing)
         {
             if (disposing)

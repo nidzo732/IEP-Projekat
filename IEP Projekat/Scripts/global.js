@@ -52,8 +52,6 @@ async function asyncAjax(url, data = {}, method = 'POST')
                     err = "";
                     if (error) err = error;
                     if (thrown) err += " " + thrown;
-                    $("*").unblock();
-                    showAlertBox("Došlo je do greške u mrežnoj komunikaciji: " + err);
                     reject(err);
                 }
             });
@@ -62,6 +60,10 @@ async function asyncAjax(url, data = {}, method = 'POST')
     }
     else
     {
+        if (data)
+        {
+            data[rfTokenName] = rfTokenValue;
+        }
         var promise = new Promise((accept, reject) =>
         {
             $.ajax(url, {
@@ -76,8 +78,6 @@ async function asyncAjax(url, data = {}, method = 'POST')
                     err = "";
                     if (error) err = error;
                     if (thrown) err += " " + thrown;
-                    $("*").unblock();
-                    showAlertBox("Došlo je do greške u mrežnoj komunikaciji: " + err);
                     reject(err);
                 }
             });
@@ -87,7 +87,6 @@ async function asyncAjax(url, data = {}, method = 'POST')
 }
 async function postBid(id, amount, button)
 {
-    
     var increment = parseFloat(amount);
     var expVal = parseFloat($(button).siblings(".auction-list-item-current-price").text());
     var result = { status: "OK" };

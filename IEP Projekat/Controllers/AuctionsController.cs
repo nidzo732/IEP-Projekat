@@ -172,6 +172,7 @@ namespace IEP_Projekat.Controllers
 
         [HttpPost]
         [Authorize]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> Bid(string id, decimal increment, decimal expVal)
         {
             if (increment <= 0 || expVal <= 0) return HttpNotFound();
